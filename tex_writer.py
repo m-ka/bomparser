@@ -115,44 +115,32 @@ class TexWriter:
 				for char in part:
 					convertedStr.append(self.__escape_latex(char))
 			elemString.extend(convertedStr)
-			elemString.append("}{%\n")
+			elemString.append("}{")
 
-			sequences = self.__findSequences(elem)
-			print "==>"
-			print elem
-			for group in sequences:
-				print group
-				# Choose the representation of RefDes in the corresponding field
-				if len(group) == 1:
-					# There is the only element in the group. Proceed without modufication
-					refdesGroup = ''.join(['\\refbox{', group[0], '}'])
-				if len(group) == 2:
-					# There are two elements in the group. Separate them with comma.
-					refdes = ', '.join(group)
-					refdesGroup = ''.join(['\\refbox{', refdes, '}'])
-				if len(group) == 3:
-					# There are three elements in the group. Deside upon ellipsis or
-					# comma separated list
-					refdes = ', '.join(group)
-					if len(refdes) > 9:
-						# Resulting string is too long, let's group it
-						refdes = ''.join([group[0], '\ldots{}', group[-1]])
-					refdesGroup = ''.join(['\\refbox{', refdes, '}'])
-				if len(group) > 3:
-					refdesGroup = ''.join(['\\refbox{', group[0], '\ldots{}', group[-1], '}'] )
-				# Don't append new line character after last element
-				if sequences.index(group) != len(sequences) - 1:
-					elemString.extend([refdesGroup, '\n'])
-				else:
-					elemString.extend(refdesGroup)
+			# Choose the representation of RefDes in the corresponding field
+			if len(elem) == 1:
+				# There is the only element in the elem. Proceed without modufication
+				refdeselem = ''.join(['\\refbox{', elem[0], '}'])
+			if len(elem) == 2:
+				# There are two elements in the elem. Separate them with comma.
+				refdes = ', '.join(elem)
+				refdeselem = ''.join(['\\refbox{', refdes, '}'])
+			if len(elem) == 3:
+				# There are three elements in the elem. Deside upon ellipsis or
+				# comma separated list
+				refdes = ', '.join(elem)
+				if len(refdes) > 9:
+					# Resulting string is too long, let's elem it
+					refdes = ''.join([elem[0], '\ldots{}', elem[-1]])
+				refdeselem = ''.join(['\\refbox{', refdes, '}'])
+			if len(elem) > 3:
+				refdeselem = ''.join(['\\refbox{', elem[0], '\ldots{}', elem[-1], '}'] )
 
+			elemString.extend(refdeselem)
 			elemString.extend('}')
 
-			# Calculate the number of elements
-			count = 0
-			for group in sequences:
-				count = count + len(group)
-			elemString.extend(["{", str(count), "}"])
+			# Add the number of elements
+			elemString.extend(["{", str(len(elem)), "}"])
 			hndFile.write(''.join(elemString))
 			hndFile.write("\n")
 
@@ -276,6 +264,11 @@ class TexWriter:
 		return [elem.refdes for elem in elemList]
 
 	def __combineElements(self):
+		"""
+			Combine elements in a sorted list into groups.
+			input:		none, this method operates on class member;
+			return:		none.
+		"""
 		refdes = list(self.sortedKeys)
 		groupedKeys = []
 		for currentElement in refdes:
@@ -309,15 +302,9 @@ class TexWriter:
 								if (len(refdes) < refdes.index(currentElement) + offset + 1):
 									break
 							else:
-								if (len(refdes) != refdes.index(currentElement) + offset + 1):
-									offset += 1
-								else:
-									process = False
-						else:
-							if (len(refdes) != refdes.index(currentElement) + offset + 1):
-								offset += 1
-							else:
 								process = False
+						else:
+							process = False
 					else:
 						process = False
 				if currentGroup:
