@@ -112,4 +112,4 @@ class BomParser:
 				else:
 					self.exceptions.append(elemType)
 					print "Отсутствует формат строки описания для элемента ", elemType
-		csvfile.close()
+		self.__dump_data()
