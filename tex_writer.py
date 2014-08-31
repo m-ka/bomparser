@@ -17,13 +17,15 @@ class Element:
 		return repr((self.refdes, self.element, self.pos))
 
 class TexWriter:
-	def __init__(self, fileName, dictBom, dictDescription):
-		self.fileName = fileName
+	def __init__(self, settings, dictBom, dictDescription):
+		self.fileName = settings["fileTex"]
 		self.dictBom = dictBom
 		self.dictDescription = dictDescription
 		self.__firstQuote = True
 		self.sortedKeys = self.__sortElements(self.dictBom.keys())
 		self.groupedKeys = []
+		self.groupMode = settings["group"]
+		self.strings = settings["strings"]
 		# This list will be used to check whether an element is unique or
 		# there are other elements of the same type
 		self.elementTypes = [re.sub('[0-9]', '', elem) for elem in self.sortedKeys]
@@ -54,9 +56,7 @@ class TexWriter:
 		hndFile = open(self.fileName, 'w')
 		self.__write_header(hndFile)
 
-		# A stub goes here. The list will be selected in accordance to 
-		# parameter read from configuration file. This functionality is not implemented yet.
-		if False:
+		if self.groupMode == "none":
 			self.__writeUngrouped(self.sortedKeys, hndFile)
 		else:
 			self.groupedKeys = self.__combineElements()
@@ -72,11 +72,13 @@ class TexWriter:
 			return:		none.
 		"""
 		prevType = ''
+		stringCounter = self.strings
 		for elem in listKeys:
 			elemType = re.sub('[0-9]', '', elem)
 			if elemType != prevType:
 				self.__write_section(hndFile, elemType)
 				prevType = elemType
+				stringsCounter = self.strings
 
 			elemString = ['\\Element{']
 			currentElem = self.dictBom[elem]
@@ -89,6 +91,11 @@ class TexWriter:
 			elemString.extend(["}{\\refbox{", elem, "}}{", currentElem[-1], "}"])
 			hndFile.write(''.join(elemString))
 			hndFile.write("\n")
+			if self.strings != 0:
+				stringsCounter -= 1
+				if stringsCounter == 0:
+					self.__writeEmptyString(hndFile)
+					stringsCounter = self.strings
 
 		self.__write_footer(hndFile)
 
@@ -101,11 +108,13 @@ class TexWriter:
 			return:		none.
 		"""
 		prevType = ''
+		stringsCounter = self.strings
 		for elem in listKeys:
 			elemType = re.sub('[0-9]', '', elem[0])
 			if elemType != prevType:
 				self.__write_section(hndFile, elemType)
 				prevType = elemType
+				stringsCounter = self.strings
 
 			elemString = ['\\Element{']
 			currentElem = self.dictBom[elem[0]]
@@ -143,8 +152,22 @@ class TexWriter:
 			elemString.extend(["{", str(len(elem)), "}"])
 			hndFile.write(''.join(elemString))
 			hndFile.write("\n")
+			if self.strings != 0:
+				stringsCounter -= 1
+				if stringsCounter == 0:
+					self.__writeEmptyString(hndFile)
+					stringsCounter = self.strings
 
 		self.__write_footer(hndFile)
+
+	def __writeEmptyString(self, hndFile):
+		"""
+			Add an empty string to resulting file.
+			hndFile:	a descriptor to open file,
+			return:		none.
+		"""
+		string = "\\Element{}{}{}\n"
+		hndFile.write(string)
 
 	def __findSequences(self, refdes):
 		"""
