@@ -3,6 +3,7 @@
 import os
 import re
 import operator
+import codecs
 
 class Element:
 	"""
@@ -53,7 +54,7 @@ class TexWriter:
 		input:			none;
 		return:			none.
 		"""
-		hndFile = open(self.fileName, 'w')
+		hndFile = codecs.open(self.fileName, mode='w', encoding='utf-8')
 		self.__write_header(hndFile)
 
 		if self.groupMode == "none":
@@ -89,7 +90,7 @@ class TexWriter:
 					convertedStr.append(self.__escape_latex(char))
 			elemString.extend(convertedStr)
 			elemString.extend(["}{\\refbox{", elem, "}}{", currentElem[-1], "}"])
-			hndFile.write(''.join(elemString))
+			hndFile.write(''.join(elemString).decode("utf-8"))
 			hndFile.write("\n")
 			if self.strings != 0:
 				stringsCounter -= 1
@@ -150,7 +151,7 @@ class TexWriter:
 
 			# Add the number of elements
 			elemString.extend(["{", str(len(elem)), "}"])
-			hndFile.write(''.join(elemString))
+			hndFile.write(''.join(elemString).decode("utf-8"))
 			hndFile.write("\n")
 			if self.strings != 0:
 				stringsCounter -= 1
@@ -167,7 +168,7 @@ class TexWriter:
 			return:		none.
 		"""
 		string = "\\Element{}{}{}\n"
-		hndFile.write(string)
+		hndFile.write(string.decode("utf-8"))
 
 	def __findSequences(self, refdes):
 		"""
@@ -203,16 +204,16 @@ class TexWriter:
 			hndFile:	the handler of open file;
 			return:		none.
 		"""
-		hndFile.write("\\documentclass[doctype=pe]{pcbdoc}\n")
-		hndFile.write("\\AuthorSet{Пупкин}\n")
-		hndFile.write("\\CheckerSet{Ближайший}\n")
-		hndFile.write("\\NormControllerSet{Суровый}\n")
-		hndFile.write("\\ApproverSet{Сказочник}\n")
-		hndFile.write("\\NameSet{Фильтр}\n")
-		hndFile.write("\\NumberSet{РОГА.12345.001}\n")
+		hndFile.write(u"\\documentclass[doctype=pe]{pcbdoc}\n")
+		hndFile.write(u"\\AuthorSet{Пупкин}\n")
+		hndFile.write(u"\\CheckerSet{Ближайший}\n")
+		hndFile.write(u"\\NormControllerSet{Суровый}\n")
+		hndFile.write(u"\\ApproverSet{Сказочник}\n")
+		hndFile.write(u"\\NameSet{Фильтр}\n")
+		hndFile.write(u"\\NumberSet{РОГА.12345.001}\n")
 
-		hndFile.write("\\begin{document}\n")
-		hndFile.write("\\begin{ElementList}\n")
+		hndFile.write(u"\\begin{document}\n")
+		hndFile.write(u"\\begin{ElementList}\n")
 
 	def __write_footer(self, hndFile):
 		"""
@@ -243,7 +244,7 @@ class TexWriter:
 			if len(self.dictDescription[element]) - 1 >= count:
 				header.extend(self.dictDescription[element][count])
 				header.append('}')
-				hndFile.write(''.join(header))
+				hndFile.write(''.join(header).decode("utf-8"))
 				hndFile.write('\n')
 
 	def __escape_latex(self, char):
