@@ -90,8 +90,9 @@ class TexWriter:
 					convertedStr.append(self.__escape_latex(char))
 			elemString.extend(convertedStr)
 			elemString.extend(["}{\\refbox{", elem, "}}{", currentElem[-1], "}"])
-			hndFile.write(''.join(elemString).decode("utf-8"))
-			hndFile.write("\n")
+			beautyStr = self.__beautifyStr(''.join(elemString))
+			hndFile.write(beautyStr.decode("utf-8"))
+			hndFile.write('\n')
 			if self.strings != 0:
 				stringsCounter -= 1
 				if stringsCounter == 0:
@@ -151,8 +152,9 @@ class TexWriter:
 
 			# Add the number of elements
 			elemString.extend(["{", str(len(elem)), "}"])
-			hndFile.write(''.join(elemString).decode("utf-8"))
-			hndFile.write("\n")
+			beautyStr = self.__beautifyStr(''.join(elemString))
+			hndFile.write(beautyStr.decode("utf-8"))
+			hndFile.write('\n')
 			if self.strings != 0:
 				stringsCounter -= 1
 				if stringsCounter == 0:
@@ -334,3 +336,24 @@ class TexWriter:
 				if currentGroup:
 					groupedKeys.append(currentGroup)
 		return groupedKeys
+
+	def __beautifyStr(self, elem):
+		"""
+			Remove excessive commas and spaces from string.
+
+			elem:		the string to process;
+			return:		processed string.
+		"""
+		# Remove leading or trailing commas and spaces
+		elem = re.sub('^[, ]*|[, ]*$', '', elem)
+		# Replace the sequences of commas with just one 
+		# corresponding symbol
+		elem = re.sub(',{2,}', ',', elem)
+		elem = re.sub('(, ){2,}', ', ', elem)
+		# Remove excessive spaces
+		elem = re.sub('( ){2,}', ' ', elem)
+		# Remove spaces before comma
+		elem = re.sub(' *,', ',', elem)
+		# Put mathematical plus-minus symbol
+		elem = re.sub('\+-|\+\\-|\+/-', "$\\pm$", elem)
+		return elem
