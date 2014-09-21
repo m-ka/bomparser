@@ -206,7 +206,7 @@ class TexWriter:
 			hndFile:	the handler of open file;
 			return:		none.
 		"""
-		hndFile.write(u"\\documentclass[doctype=pe]{pcbdoc}\n")
+		hndFile.write(u"\\documentclass[doctype=pe,compactmode]{pcbdoc}\n")
 		hndFile.write(u"\\AuthorSet{Пупкин}\n")
 		hndFile.write(u"\\CheckerSet{Ближайший}\n")
 		hndFile.write(u"\\NormControllerSet{Суровый}\n")
